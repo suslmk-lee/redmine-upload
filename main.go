@@ -19,7 +19,7 @@ import (
 const (
 	bucketName   = "your-s3-bucket-name"
 	region       = "your-region"
-	dsn          = "root:ahsus123@tcp(localhost:3307)"
+	dsn          = "root:ahsus123@tcp(localhost:3307)/"
 	pollInterval = 10 * time.Second
 )
 
@@ -32,7 +32,7 @@ type Issue struct {
 }
 
 func fetchNewIssues(db *sql.DB, lastChecked time.Time) ([]Issue, error) {
-	rows, err := db.Query("SELECT id, subject, description, created_on, updated_on FROM issues WHERE updated_on > ?", lastChecked)
+	rows, err := db.Query("SELECT id, subject, description, created_on, updated_on FROM bitnami_redmine.issues WHERE updated_on > ?", lastChecked)
 	if err != nil {
 		return nil, err
 	}
