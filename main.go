@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -16,10 +17,10 @@ import (
 )
 
 const (
-	bucketName   = "your-s3-bucket-name"                       // Replace with your S3 bucket name
-	region       = "your-region"                               // Replace with your AWS region
-	dsn          = "user:password@tcp(localhost:3306)/redmine" // Replace with your MySQL DSN
-	pollInterval = 10 * time.Second                            // Polling interval
+	bucketName   = "your-s3-bucket-name"
+	region       = "your-region"
+	dsn          = "root:ahsus123@tcp(localhost:3307)"
+	pollInterval = 10 * time.Second
 )
 
 type Issue struct {
@@ -63,7 +64,7 @@ func createCloudEvent(issue Issue) (cloudevents.Event, error) {
 
 func uploadToS3(s3Client *s3.S3, data []byte, key string) error {
 	input := &s3.PutObjectInput{
-		Body:   aws.ReadSeekCloser(data),
+		Body:   bytes.NewReader(data),
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 	}
