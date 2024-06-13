@@ -32,7 +32,10 @@ type Issue struct {
 }
 
 func fetchNewIssues(db *sql.DB, lastChecked time.Time) ([]Issue, error) {
-	rows, err := db.Query("SELECT id, subject, description, created_on, updated_on FROM bitnami_redmine.issues WHERE updated_on > ?", lastChecked)
+	// Use the proper format for MySQL DATETIME
+	formattedTime := lastChecked.Format("2006-01-02 15:04:05")
+	query := "SELECT id, subject, description, created_on, updated_on FROM bitnami_redmine.issues WHERE updated_on > ?"
+	rows, err := db.Query(query, formattedTime)
 	if err != nil {
 		return nil, err
 	}
