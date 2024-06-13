@@ -19,7 +19,7 @@ import (
 const (
 	bucketName   = "your-s3-bucket-name"
 	region       = "your-region"
-	dsn          = "root:ahsus123@tcp(localhost:3307)/"
+	dsn          = "root:ahsus123@tcp(localhost:3307)/?parseTime=true"
 	pollInterval = 10 * time.Second
 )
 
@@ -93,7 +93,7 @@ func main() {
 	}
 
 	s3Client := s3.New(sess)
-	lastChecked := time.Now()
+	lastChecked := time.Now().Add(-7 * 24 * time.Hour)
 
 	for {
 		// Fetch new issues from MySQL
