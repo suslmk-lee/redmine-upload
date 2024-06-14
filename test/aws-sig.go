@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	awsAccessKeyID     = "your-access-key-id"
-	awsSecretAccessKey = "your-secret-access-key"
+	awsAccessKeyID     = ""
+	awsSecretAccessKey = ""
 	region             = "KR1"
 	service            = "s3"
 )
