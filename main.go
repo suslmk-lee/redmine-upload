@@ -21,12 +21,14 @@ var (
 	bucketName string
 	region     string
 	dsn        string
+	endpoint   string
 )
 
 func init() {
 	region = common.ConfInfo["nhn.storage.region"]
 	bucketName = common.ConfInfo["nhn.storage.endpoint.url"]
 	dsn = common.ConfInfo["database.url"]
+	endpoint = common.ConfInfo["nhn.storage.endpoint.url"]
 }
 
 func main() {
@@ -39,7 +41,9 @@ func main() {
 
 	// Create a new AWS session
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region)},
+		Region:           aws.String(region),
+		Endpoint:         aws.String(endpoint),
+		S3ForcePathStyle: aws.Bool(true)},
 	)
 	if err != nil {
 		log.Fatalf("failed to create AWS session: %v", err)
