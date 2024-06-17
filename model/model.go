@@ -5,6 +5,7 @@ import "time"
 // Issue represents an issue in the Redmine system
 type Issue struct {
 	ID             int       `json:"id"`
+	JobID          int       `json:"job_id"`
 	Status         string    `json:"status"`
 	Assignee       string    `json:"assignee"`
 	StartDate      time.Time `json:"start_date"`

@@ -22,7 +22,7 @@ func ConnectDB(dsn string) (*sql.DB, error) {
 func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
 	formattedTime := lastChecked.Format("2006-01-02 15:04:05")
 	query := `
-        SELECT i.id, is2.name, u.firstname, u.lastname, i.start_date, i.due_date, i.done_ratio, i.estimated_hours,
+        SELECT j.id, i.id as 'job_id', is2.name, u.firstname, u.lastname, i.start_date, i.due_date, i.done_ratio, i.estimated_hours,
         (SELECT e.name FROM bitnami_redmine.enumerations e WHERE e.type = 'IssuePriority' AND i.priority_id = e.id) AS priority,
         (SELECT b.firstname FROM bitnami_redmine.users b WHERE i.author_id = b.id) AS author,
         i.subject, i.description,
@@ -48,7 +48,7 @@ func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
 		var estimatedHours sql.NullFloat64
 		var dueDate sql.NullTime
 		if err := rows.Scan(
-			&issue.ID, &issue.Status, &assigneeFirstName, &assigneeLastName, &issue.StartDate, &dueDate,
+			&issue.ID, &issue.JobID, &issue.Status, &assigneeFirstName, &assigneeLastName, &issue.StartDate, &dueDate,
 			&issue.DoneRatio, &estimatedHours, &issue.Priority, &issue.Author, &issue.Subject,
 			&issue.Description, &commentorFirstName, &issue.Notes, &issue.CreatedOn,
 		); err != nil {
