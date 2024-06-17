@@ -48,7 +48,7 @@ func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
 		var estimatedHours sql.NullFloat64
 		if err := rows.Scan(
 			&issue.ID, &issue.Status, &assigneeFirstName, &assigneeLastName, &issue.StartDate, &issue.DueDate,
-			&issue.DoneRatio, &issue.EstimatedHours, &issue.Priority, &issue.Author, &issue.Subject,
+			&issue.DoneRatio, &estimatedHours, &issue.Priority, &issue.Author, &issue.Subject,
 			&issue.Description, &commentorFirstName, &issue.Notes, &issue.CreatedOn,
 		); err != nil {
 			return nil, err
