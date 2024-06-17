@@ -37,12 +37,27 @@ func init() {
 }
 
 func main() {
+	// Ensure the keys are not empty
+	if accessKey == "" || secretKey == "" {
+		log.Fatalf("AccessKey or SecretKey is empty")
+	}
+
 	// Connect to MySQL database
 	db, err := database.ConnectDB(dsn)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 	defer db.Close()
+
+	// Load the last checked time from file
+	lastChecked, err := common.LoadLastCheckedTime()
+	if err != nil {
+		log.Fatalf("failed to load last checked time: %v", err)
+	}
+	if lastChecked.IsZero() {
+		// If there is no last checked time, start from one week ago
+		lastChecked = time.Now().Add(-7 * 24 * time.Hour)
+	}
 
 	// Create a new AWS session
 	sess, err := session.NewSession(&aws.Config{
@@ -56,7 +71,6 @@ func main() {
 	}
 
 	s3Client := s3.New(sess)
-	lastChecked := time.Now().Add(-7 * 24 * time.Hour)
 
 	for {
 		// Fetch new issues from MySQL
@@ -74,6 +88,10 @@ func main() {
 
 		// Update lastChecked time
 		lastChecked = time.Now()
+		err = common.SaveLastCheckedTime(lastChecked)
+		if err != nil {
+			log.Printf("failed to save last checked time: %v", err)
+		}
 
 		// Sleep for the poll interval
 		time.Sleep(pollInterval)

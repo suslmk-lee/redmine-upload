@@ -2,10 +2,12 @@ package common
 
 import (
 	"bufio"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 type AppConfigProperties map[string]string
@@ -68,4 +70,22 @@ func RandomString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+const timestampFile = "last_checked_timestamp.txt"
+
+// SaveLastCheckedTime saves the last checked time to a file
+func SaveLastCheckedTime(t time.Time) error {
+	return ioutil.WriteFile(timestampFile, []byte(t.Format(time.RFC3339)), 0644)
+}
+
+// LoadLastCheckedTime loads the last checked time from a file
+func LoadLastCheckedTime() (time.Time, error) {
+	data, err := ioutil.ReadFile(timestampFile)
+	if os.IsNotExist(err) {
+		return time.Time{}, nil // Return zero time if the file does not exist
+	} else if err != nil {
+		return time.Time{}, err
+	}
+	return time.Parse(time.RFC3339, string(data))
 }
