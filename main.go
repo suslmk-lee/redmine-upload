@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
 	"time"
 
@@ -22,6 +23,8 @@ var (
 	region     string
 	dsn        string
 	endpoint   string
+	accessKey  string
+	secretKey  string
 )
 
 func init() {
@@ -29,6 +32,8 @@ func init() {
 	bucketName = common.ConfInfo["nhn.storage.bucket.name"]
 	dsn = common.ConfInfo["database.url"]
 	endpoint = common.ConfInfo["nhn.storage.endpoint.url"]
+	accessKey = common.ConfInfo["nhn.storage.access.key"]
+	secretKey = common.ConfInfo["nhn.storage.secret.key"]
 }
 
 func main() {
@@ -43,6 +48,7 @@ func main() {
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String(region),
 		Endpoint:         aws.String(endpoint),
+		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		S3ForcePathStyle: aws.Bool(true)}, // Use path-style addressing for compatibility with custom endpoints
 	)
 	if err != nil {
