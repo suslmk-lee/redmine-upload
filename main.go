@@ -32,8 +32,8 @@ func init() {
 	bucketName = common.ConfInfo["nhn.storage.bucket.name"]
 	dsn = common.ConfInfo["database.url"]
 	endpoint = common.ConfInfo["nhn.storage.endpoint.url"]
-	accessKey = common.ConfInfo["nhn.storage.access.key"]
-	secretKey = common.ConfInfo["nhn.storage.secret.key"]
+	accessKey = common.ConfInfo["nhn.storage.accessKey"]
+	secretKey = common.ConfInfo["nhn.storage.secretKey"]
 }
 
 func main() {
