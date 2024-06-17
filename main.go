@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	region = common.ConfInfo["nhn.storage.region"]
+	region = common.ConfInfo["nhn.region"]
 	bucketName = common.ConfInfo["nhn.storage.bucket.name"]
 	dsn = common.ConfInfo["database.url"]
 	endpoint = common.ConfInfo["nhn.storage.endpoint.url"]
