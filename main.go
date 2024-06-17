@@ -43,7 +43,7 @@ func main() {
 	sess, err := session.NewSession(&aws.Config{
 		Region:           aws.String(region),
 		Endpoint:         aws.String(endpoint),
-		S3ForcePathStyle: aws.Bool(true)},
+		S3ForcePathStyle: aws.Bool(true)}, // Use path-style addressing for compatibility with custom endpoints
 	)
 	if err != nil {
 		log.Fatalf("failed to create AWS session: %v", err)
