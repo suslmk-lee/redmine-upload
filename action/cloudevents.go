@@ -65,6 +65,8 @@ func ProcessIssues(s3Client *s3.S3, bucketName string, issues []model.Issue) err
 		if err != nil {
 			log.Printf("failed to upload data to S3: %v", err)
 			continue
+		} else {
+			fmt.Printf("Upload Issue :: [%s] %s", issue.Author, key)
 		}
 	}
 	return nil

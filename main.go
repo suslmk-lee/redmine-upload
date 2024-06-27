@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
 	"time"
@@ -37,6 +38,7 @@ func init() {
 }
 
 func main() {
+	fmt.Printf("Start redmine-upload Service..")
 	// Ensure the keys are not empty
 	if accessKey == "" || secretKey == "" {
 		log.Fatalf("AccessKey or SecretKey is empty")
