@@ -38,7 +38,8 @@ func init() {
 }
 
 func main() {
-	fmt.Printf("Start redmine-upload Service..")
+	go printKST()
+	fmt.Println("Start redmine-upload Service..")
 	// Ensure the keys are not empty
 	if accessKey == "" || secretKey == "" {
 		log.Fatalf("AccessKey or SecretKey is empty")
@@ -97,5 +98,20 @@ func main() {
 
 		// Sleep for the poll interval
 		time.Sleep(pollInterval)
+	}
+}
+
+func printKST() {
+	loc, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		panic(err)
+	}
+
+	// 프로그램 시작시..
+	fmt.Println(time.Now().In(loc).Format("2006-01-02 15:04:05"))
+
+	// 1시간마다..
+	for range time.NewTicker(1 * time.Hour).C {
+		fmt.Println(time.Now().In(loc).Format("2006-01-02 15:04:05"))
 	}
 }
