@@ -71,3 +71,34 @@ func ProcessIssues(s3Client *s3.S3, bucketName string, issues []model.Issue) err
 	}
 	return nil
 }
+
+func ProcessImminentIssues(s3Client *s3.S3, bucketName string, issues []model.Issue) error {
+	for _, issue := range issues {
+		// Create CloudEvent for each issue
+		event, err := CreateCloudEvent(issue)
+		if err != nil {
+			log.Printf("failed to create CloudEvent: %v", err)
+			continue
+		}
+
+		// Convert CloudEvent to JSON
+		data, err := json.Marshal(event)
+		if err != nil {
+			log.Printf("failed to marshal CloudEvent: %v", err)
+			continue
+		}
+
+		// Generate a unique key for the S3 object
+		key := fmt.Sprintf("imminentIssue/%s.json", uuid.New().String())
+
+		// Upload event data to S3
+		err = UploadToS3(s3Client, bucketName, data, key)
+		if err != nil {
+			log.Printf("failed to upload data to S3: %v", err)
+			continue
+		} else {
+			fmt.Printf("Upload Issue :: [%s] %s\n", issue.Assignee, key)
+		}
+	}
+	return nil
+}

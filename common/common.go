@@ -2,6 +2,7 @@ package common
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -88,4 +89,15 @@ func LoadLastCheckedTime() (time.Time, error) {
 		return time.Time{}, err
 	}
 	return time.Parse(time.RFC3339, string(data))
+}
+
+func TodayDate(format string) string {
+	loc, err := time.LoadLocation("Asia/Seoul")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	now := time.Now().In(loc)
+
+	return now.Format(format)
 }

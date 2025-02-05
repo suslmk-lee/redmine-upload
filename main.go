@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"log"
@@ -75,30 +76,71 @@ func main() {
 
 	s3Client := s3.New(sess)
 
+	targetTimes := []string{"09:00", "13:00"}
+	lastRun := make(map[string]time.Time)
 	for {
-		// Fetch new issues from MySQL
-		issues, err := database.FetchNewIssues(db, lastChecked)
-		if err != nil {
-			log.Printf("failed to fetch new issues: %v", err)
-			continue
+		now := time.Now()
+		currentTimeStr := now.Format("15:04")
+
+		for _, target := range targetTimes {
+			if currentTimeStr == target {
+				if last, exists := lastRun[target]; exists || last.Day() != now.Day() {
+					processOne(db, s3Client)
+					lastRun[target] = now
+				}
+			}
 		}
 
-		// Process and upload issues
-		err = action.ProcessIssues(s3Client, bucketName, issues)
+		lastChecked, err := common.LoadLastCheckedTime()
 		if err != nil {
-			log.Printf("failed to process and upload issues: %v", err)
+			log.Fatalf("failed to load last checked time: %v", err)
 		}
+		fmt.Println(lastChecked)
 
-		// Update lastChecked time
-		lastChecked = time.Now()
-		err = common.SaveLastCheckedTime(lastChecked)
-		if err != nil {
-			log.Printf("failed to save last checked time: %v", err)
-		}
+		processTwo(db, s3Client, lastChecked)
 
 		// Sleep for the poll interval
 		time.Sleep(pollInterval)
 	}
+}
+
+func processOne(db *sql.DB, s3Client *s3.S3) {
+	ImminentIssues, err := database.FetchImminentIssue(db)
+	if err != nil {
+		log.Printf("failed to fetch new issues: %v", err)
+		return
+	}
+
+	if len(ImminentIssues) > 0 {
+		err = action.ProcessImminentIssues(s3Client, bucketName, ImminentIssues)
+		if err != nil {
+			log.Printf("failed to process and upload issues: %v", err)
+		}
+	}
+}
+
+func processTwo(db *sql.DB, s3Client *s3.S3, lastChecked time.Time) {
+	// Fetch new issues from MySQL
+	issues, err := database.FetchNewIssues(db, lastChecked)
+	if err != nil {
+		log.Printf("failed to fetch new issues: %v", err)
+		return
+	}
+	fmt.Println(len(issues))
+
+	// Process and upload issues
+	err = action.ProcessIssues(s3Client, bucketName, issues)
+	if err != nil {
+		log.Printf("failed to process and upload issues: %v", err)
+	}
+
+	// Update lastChecked time
+	lastChecked = time.Now()
+	err = common.SaveLastCheckedTime(lastChecked)
+	if err != nil {
+		log.Printf("failed to save last checked time: %v", err)
+	}
+
 }
 
 func printKST() {
