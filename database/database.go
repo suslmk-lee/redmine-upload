@@ -85,11 +85,13 @@ func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
         (SELECT b.firstname FROM bitnami_redmine.users b WHERE i.author_id = b.id) AS author,
         i.subject, i.description,
         (SELECT b.firstname FROM bitnami_redmine.users b WHERE j.user_id = b.id) AS commentor,
+        jd.property, jd.prop_key, jd.old_value, jd.value,
         j.notes, j.created_on
         FROM bitnami_redmine.issues i
         JOIN bitnami_redmine.issue_statuses is2 ON i.status_id = is2.id
         JOIN bitnami_redmine.users u ON i.assigned_to_id = u.id
         JOIN bitnami_redmine.journals j ON i.id = j.journalized_id
+        left outer join bitnami_redmine.journal_details jd on j.id = jd.journal_id 
         WHERE j.created_on > ?
         ORDER BY j.created_on DESC`
 
@@ -103,17 +105,24 @@ func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
 	for rows.Next() {
 		var issue model.Issue
 		var assigneeFirstName, assigneeLastName, commentorFirstName sql.NullString
+		var property, propKey, oldValue, value sql.NullString
 		var estimatedHours sql.NullFloat64
 		var dueDate sql.NullTime
 		if err := rows.Scan(
 			&issue.ID, &issue.JobID, &issue.Status, &assigneeFirstName, &assigneeLastName, &issue.StartDate, &dueDate,
 			&issue.DoneRatio, &estimatedHours, &issue.Priority, &issue.Author, &issue.Subject,
-			&issue.Description, &commentorFirstName, &issue.Notes, &issue.CreatedOn,
+			&issue.Description, &commentorFirstName,
+			&property, &propKey, &oldValue, &value,
+			&issue.Notes, &issue.CreatedOn,
 		); err != nil {
 			return nil, err
 		}
 		issue.Assignee = fmt.Sprintf("%s %s", assigneeFirstName.String, assigneeLastName.String)
 		issue.Commentor = commentorFirstName.String
+		issue.Property = property.String
+		issue.PropKey = propKey.String
+		issue.OldValue = oldValue.String
+		issue.Value = value.String
 		if estimatedHours.Valid {
 			issue.EstimatedHours = estimatedHours.Float64
 		} else {

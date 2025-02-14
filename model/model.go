@@ -20,6 +20,10 @@ type Issue struct {
 	Subject        string    `json:"subject"`
 	Description    string    `json:"description"`
 	Commentor      string    `json:"commentor"`
+	Property       string    `json:"property"`
+	PropKey        string    `json:"prop_key"`
+	OldValue       string    `json:"old_value"`
+	Value          string    `json:"value"`
 	Notes          string    `json:"notes"`
 	CreatedOn      time.Time `json:"created_on"`
 	UpdatedOn      time.Time `json:"updated_on"`
