@@ -77,17 +77,20 @@ func main() {
 	s3Client := s3.New(sess)
 
 	targetTimes := []string{"09:00", "13:00"}
-	lastRun := make(map[string]time.Time)
+	lastRun := make(map[string]bool)
 	for {
 		now := time.Now()
 		currentTimeStr := now.Format("15:04")
 
 		for _, target := range targetTimes {
 			if currentTimeStr == target {
-				if last, exists := lastRun[target]; exists || last.Day() != now.Day() {
+				if !lastRun[target] {
 					processOne(db, s3Client)
-					lastRun[target] = now
+					lastRun[target] = true
 				}
+			} else {
+				// 시간이 지나면 다음 실행을 위해 플래그를 초기화
+				lastRun[target] = false
 			}
 		}
 
