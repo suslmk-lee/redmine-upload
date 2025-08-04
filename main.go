@@ -98,7 +98,10 @@ func main() {
 		if err != nil {
 			log.Fatalf("failed to load last checked time: %v", err)
 		}
-		fmt.Println(lastChecked)
+
+		if now.Minute() == 00 && now.Second() == 00 {
+			fmt.Println(lastChecked)
+		}
 
 		processTwo(db, s3Client, lastChecked)
 
@@ -129,7 +132,6 @@ func processTwo(db *sql.DB, s3Client *s3.S3, lastChecked time.Time) {
 		log.Printf("failed to fetch new issues: %v", err)
 		return
 	}
-	fmt.Println(len(issues))
 
 	// Process and upload issues
 	err = action.ProcessIssues(s3Client, bucketName, issues)
