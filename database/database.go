@@ -45,7 +45,7 @@ func FetchImminentIssue(db *sql.DB) ([]model.Issue, error) {
 
 	for rows.Next() {
 		var issue model.Issue
-		var assigneeFirstName, assigneeLastName, commentorFirstName sql.NullString
+		var assigneeFirstName, assigneeLastName, commentorFirstName, description sql.NullString
 		var estimatedHours sql.NullFloat64
 		var dueDate sql.NullTime
 		if err := rows.Scan(
@@ -54,12 +54,13 @@ func FetchImminentIssue(db *sql.DB) ([]model.Issue, error) {
 			&issue.Priority,
 			&issue.Author,
 			&issue.Email,
-			&issue.Subject, &issue.Description, &issue.UpdatedOn,
+			&issue.Subject, &description, &issue.UpdatedOn,
 		); err != nil {
 			return nil, err
 		}
 		issue.Assignee = fmt.Sprintf("%s %s", assigneeFirstName.String, assigneeLastName.String)
 		issue.Commentor = commentorFirstName.String
+		issue.Description = description.String
 		if estimatedHours.Valid {
 			issue.EstimatedHours = estimatedHours.Float64
 		} else {
@@ -104,25 +105,27 @@ func FetchNewIssues(db *sql.DB, lastChecked time.Time) ([]model.Issue, error) {
 	var issues []model.Issue
 	for rows.Next() {
 		var issue model.Issue
-		var assigneeFirstName, assigneeLastName, commentorFirstName sql.NullString
+		var assigneeFirstName, assigneeLastName, commentorFirstName, description, notes sql.NullString
 		var property, propKey, oldValue, value sql.NullString
 		var estimatedHours sql.NullFloat64
 		var dueDate sql.NullTime
 		if err := rows.Scan(
 			&issue.ID, &issue.JobID, &issue.Status, &assigneeFirstName, &assigneeLastName, &issue.StartDate, &dueDate,
 			&issue.DoneRatio, &estimatedHours, &issue.Priority, &issue.Author, &issue.Subject,
-			&issue.Description, &commentorFirstName,
+			&description, &commentorFirstName,
 			&property, &propKey, &oldValue, &value,
-			&issue.Notes, &issue.CreatedOn,
+			&notes, &issue.CreatedOn,
 		); err != nil {
 			return nil, err
 		}
 		issue.Assignee = fmt.Sprintf("%s %s", assigneeFirstName.String, assigneeLastName.String)
 		issue.Commentor = commentorFirstName.String
+		issue.Description = description.String
 		issue.Property = property.String
 		issue.PropKey = propKey.String
 		issue.OldValue = oldValue.String
 		issue.Value = value.String
+		issue.Notes = notes.String
 		if estimatedHours.Valid {
 			issue.EstimatedHours = estimatedHours.Float64
 		} else {
